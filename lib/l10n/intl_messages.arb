@@ -1,5 +1,5 @@
 {
-  "@@last_modified": "2024-11-18T20:44:32.192113",
+  "@@last_modified": "2024-11-19T03:05:11.711272",
   "initializing_data": "Initializing data...",
   "@initializing_data": {
     "type": "text",
@@ -4086,12 +4086,6 @@
   },
   "doYouWantToLogoutOf": "Do you want to log out of",
   "@doYouWantToLogoutOf": {
-    "type": "text",
-    "placeholders_order": [],
-    "placeholders": {}
-  },
-  "tokenInvalid": "Token invalid",
-  "@tokenInvalid": {
     "type": "text",
     "placeholders_order": [],
     "placeholders": {}
