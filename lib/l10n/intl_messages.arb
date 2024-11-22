@@ -1,5 +1,5 @@
 {
-  "@@last_modified": "2024-11-19T03:05:11.711272",
+  "@@last_modified": "2024-11-22T22:45:13.197952",
   "initializing_data": "Initializing data...",
   "@initializing_data": {
     "type": "text",
@@ -4072,8 +4072,8 @@
     "placeholders_order": [],
     "placeholders": {}
   },
-  "logoutConfirmation": "Logout Confirmation",
-  "@logoutConfirmation": {
+  "swithAccountConfirmation": "Switch Account Confirmation",
+  "@swithAccountConfirmation": {
     "type": "text",
     "placeholders_order": [],
     "placeholders": {}
@@ -4086,6 +4086,12 @@
   },
   "doYouWantToLogoutOf": "Do you want to log out of",
   "@doYouWantToLogoutOf": {
+    "type": "text",
+    "placeholders_order": [],
+    "placeholders": {}
+  },
+  "andSwitchAccount": "and switch account",
+  "@andSwitchAccount": {
     "type": "text",
     "placeholders_order": [],
     "placeholders": {}

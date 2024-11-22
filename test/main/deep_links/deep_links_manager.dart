@@ -1,51 +1,117 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:tmail_ui_user/features/home/domain/usecases/auto_sign_in_via_deep_link_interactor.dart';
-import 'package:tmail_ui_user/main/deep_links/deep_link_data.dart';
+import 'package:tmail_ui_user/main/deep_links/deep_link_action_type.dart';
 import 'package:tmail_ui_user/main/deep_links/deep_links_manager.dart';
 
-class MockAutoSignInViaDeepLinkInteractor extends Mock implements AutoSignInViaDeepLinkInteractor {}
-
 void main() {
-  final mockAutoSignInViaDeepLinkInteractor = MockAutoSignInViaDeepLinkInteractor();
-  final deepLinkManager = DeepLinksManager(mockAutoSignInViaDeepLinkInteractor);
+  final deepLinkManager = DeepLinksManager();
 
-  group('DeepLinksManager::parseDeepLink::test', () {
-    test('Valid deep link with multiple query parameters', () {
-      const deepLink = 'twake.mail://openApp?access_token=ey123456&refresh_token=ey7890&id_token=token&expires_in=3600&username=user@example.com';
-      final expectedData = DeepLinkData(
-        action: 'openapp',
-        accessToken: 'ey123456',
-        refreshToken: 'ey7890',
-        idToken: 'token',
-        expiresIn: 3600,
-        username: 'user@example.com',
-      );
-      final deepLinkData = deepLinkManager.parseDeepLink(deepLink);
+  group('DeepLinksManager::test', () {
+    group('parseDeepLink::test', () {
+      test('SHOULD returns correct DeepLinkData for valid openApp deep link', () {
+        const url = 'twake://openApp/some-data';
+        final result = deepLinkManager.parseDeepLink(url);
 
-      expect(deepLinkData, equals(expectedData));
+        expect(result, isNotNull);
+        expect(result?.actionType, DeepLinkActionType.openApp);
+      });
+
+      test('SHOULD returns DeepLinkData with unknown action for unhandled action', () {
+        const url = 'twake://unknownAction/some-data';
+        final result = deepLinkManager.parseDeepLink(url);
+
+        expect(result, isNotNull);
+        expect(result?.actionType, DeepLinkActionType.unknown);
+      });
+
+      test('SHOULD returns null for malformed URL', () {
+        const url = 'Invalid link: invalid';
+        final result = deepLinkManager.parseDeepLink(url);
+
+        expect(result, isNull);
+      });
+
+      test('SHOULD returns null for exception during parsing', () {
+        const url = 'twake://malformedurl%';
+        final result = deepLinkManager.parseDeepLink(url);
+
+        expect(result, isNull);
+      });
     });
 
-    test('Deep link with no query parameters', () {
-      const deepLink = 'twake.mail://openApp';
-      final expectedData = DeepLinkData(action: 'openapp');
-      final deepLinkData = deepLinkManager.parseDeepLink(deepLink);
+    group('parseOpenAppDeepLink::test', () {
+      test('SHOULD returns OpenAppDeepLinkData with all valid parameters', () {
+        final uri = Uri.parse(
+          'twake://openApp?access_token=token123'
+              '&refresh_token=refresh123'
+              '&id_token=id123'
+              '&expires_in=3600'
+              '&username=dXNlcg=='
+              '&registration_url=https://registration.url'
+              '&jmap_url=https://jmap.url',
+        );
 
-      expect(deepLinkData, expectedData);
-    });
+        final result = deepLinkManager.parseOpenAppDeepLink(uri);
 
-    test('Deep link with one query parameter', () {
-      const deepLink = 'twake.mail://openApp?access_token=ey123456';
-      final expectedData = DeepLinkData(action: 'openapp', accessToken: 'ey123456',);
-      final deepLinkData = deepLinkManager.parseDeepLink(deepLink);
+        expect(result, isNotNull);
+        expect(result?.accessToken, 'token123');
+        expect(result?.refreshToken, 'refresh123');
+        expect(result?.idToken, 'id123');
+        expect(result?.expiresIn, 3600);
+        expect(result?.username, 'user');
+        expect(result?.registrationUrl, 'https://registration.url');
+        expect(result?.jmapUrl, 'https://jmap.url');
+        expect(result?.isValidAuthentication(), isTrue);
+      });
 
-      expect(deepLinkData, equals(expectedData));
-    });
+      test('SHOULD returns OpenAppDeepLinkData with missing optional parameters', () {
+        final uri = Uri.parse(
+          'twake://openApp?access_token=token123'
+              '&username=user@example.com'
+              '&registration_url=https://registration.url'
+              '&jmap_url=https://jmap.url',
+        );
 
-    test('Invalid deep link format', () {
-      const deepLink = 'Invalid link: invalid';
-      final deepLinkData = deepLinkManager.parseDeepLink(deepLink);
-      expect(deepLinkData, isNull);
+        final result = deepLinkManager.parseOpenAppDeepLink(uri);
+
+        expect(result, isNotNull);
+        expect(result?.accessToken, 'token123');
+        expect(result?.refreshToken, isNull);
+        expect(result?.idToken, isNull);
+        expect(result?.expiresIn, isNull);
+        expect(result?.username, 'user@example.com');
+        expect(result?.registrationUrl, 'https://registration.url');
+        expect(result?.jmapUrl, 'https://jmap.url');
+        expect(result?.isValidAuthentication(), isTrue);
+      });
+
+
+      test('SHOULD returns OpenAppDeepLinkData with invalid expires_in', () {
+        final uri = Uri.parse(
+          'twake://openApp?access_token=token123'
+              '&expires_in=not_a_number'
+              '&registration_url=https://registration.url'
+              '&jmap_url=https://jmap.url',
+        );
+
+        final result = deepLinkManager.parseOpenAppDeepLink(uri);
+
+        expect(result, isNotNull);
+        expect(result?.expiresIn, isNull);
+      });
+
+      test('SHOULD returns OpenAppDeepLinkData with origin username if Base64 decoding fails', () {
+        final uri = Uri.parse(
+          'twake://openApp?access_token=token123'
+              '&username=invalid_base64'
+              '&registration_url=https://registration.url'
+              '&jmap_url=https://jmap.url',
+        );
+
+        final result = deepLinkManager.parseOpenAppDeepLink(uri);
+
+        expect(result, isNotNull);
+        expect(result?.username, 'invalid_base64');
+      });
     });
   });
 }

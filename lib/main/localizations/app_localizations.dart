@@ -4274,10 +4274,10 @@ class AppLocalizations {
     );
   }
 
-  String get logoutConfirmation {
+  String get swithAccountConfirmation {
     return Intl.message(
-      'Logout Confirmation',
-      name: 'logoutConfirmation',
+      'Switch Account Confirmation',
+      name: 'swithAccountConfirmation',
     );
   }
 
@@ -4292,6 +4292,13 @@ class AppLocalizations {
     return Intl.message(
       'Do you want to log out of',
       name: 'doYouWantToLogoutOf',
+    );
+  }
+
+  String get andSwitchAccount {
+    return Intl.message(
+      'and switch account',
+      name: 'andSwitchAccount',
     );
   }
 }
