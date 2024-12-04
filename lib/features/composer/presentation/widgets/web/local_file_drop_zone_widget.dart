@@ -1,13 +1,18 @@
 
+import 'dart:async';
+
+import 'package:collection/collection.dart';
+import 'package:core/data/constants/constant.dart';
 import 'package:core/presentation/resources/image_paths.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:model/upload/file_info.dart';
+import 'package:super_clipboard/super_clipboard.dart';
+import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 import 'package:tmail_ui_user/features/composer/presentation/styles/web/drop_zone_widget_style.dart';
 import 'package:tmail_ui_user/main/localizations/app_localizations.dart';
-import 'package:desktop_drop/desktop_drop.dart';
 
-typedef OnLocalFileDropZoneListener = Function(DropDoneDetails details);
 
 class LocalFileDropZoneWidget extends StatelessWidget {
 
@@ -15,7 +20,7 @@ class LocalFileDropZoneWidget extends StatelessWidget {
   final double? width;
   final double? height;
   final EdgeInsetsGeometry margin;
-  final OnLocalFileDropZoneListener? onLocalFileDropZoneListener;
+  final void Function(List<FileInfo> fileInfos)? onSuperDrop;
 
   const LocalFileDropZoneWidget({
     super.key,
@@ -23,13 +28,41 @@ class LocalFileDropZoneWidget extends StatelessWidget {
     this.width,
     this.height,
     this.margin = DropZoneWidgetStyle.margin,
-    this.onLocalFileDropZoneListener
+    this.onSuperDrop,
   });
 
   @override
   Widget build(BuildContext context) {
-    return DropTarget(
-      onDragDone: onLocalFileDropZoneListener,
+    final allowedFormats = Formats.standardFormats.where((format) {
+      return format != Formats.plainText
+        && format != Formats.htmlText
+        && format != Formats.uri
+        && format != Formats.fileUri;
+    }).cast<SimpleFileFormat>().toList();
+
+    return DropRegion(
+      formats: allowedFormats,
+      onDropOver: (_) => DropOperation.copy,
+      onPerformDrop: (performDropEvent) async {
+        final items = performDropEvent.session.items;
+        final listFileInfo = await Future.wait(items.map(
+          (item) async {
+            final dataReaderFile = await item.dataReader?.getFileFuture(
+              SimpleFileFormat(mimeTypes: item.platformFormats)
+            );
+            final bytes = await dataReaderFile?.readAll();
+            return FileInfo(
+              fileName: dataReaderFile?.fileName ?? await item.dataReader?.getSuggestedName() ?? '',
+              fileSize: bytes?.length ?? 0,
+              bytes: bytes,
+              isInline: item.platformFormats.firstOrNull?.startsWith(Constant.imageType),
+              type: item.platformFormats.firstOrNull,
+            );
+          },
+        ));
+        
+        onSuperDrop?.call(listFileInfo);
+      },
       child: SizedBox(
         width: width,
         height: height,
@@ -67,5 +100,20 @@ class LocalFileDropZoneWidget extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+extension _DataReaderExtension on DataReader {
+  Future<DataReaderFile?> getFileFuture(FileFormat format) {
+    final c = Completer<DataReaderFile?>();
+    final progress = getFile(
+      format,
+      (file) => c.complete(file),
+      onError: (e) => c.completeError(e),
+    );
+    if (progress == null) {
+      c.complete(null);
+    }
+    return c.future;
   }
 }
