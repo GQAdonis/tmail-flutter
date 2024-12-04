@@ -46,8 +46,8 @@ void main() {
               '&id_token=id123'
               '&expires_in=3600'
               '&username=dXNlcg=='
-              '&registration_url=https://registration.url'
-              '&jmap_url=https://jmap.url',
+              '&registrationUrl=https://registration.url'
+              '&jmapUrl=https://jmap.url',
         );
 
         final result = deepLinkManager.parseOpenAppDeepLink(uri);
@@ -67,8 +67,8 @@ void main() {
         final uri = Uri.parse(
           'twake://openApp?access_token=token123'
               '&username=user@example.com'
-              '&registration_url=https://registration.url'
-              '&jmap_url=https://jmap.url',
+              '&registrationUrl=https://registration.url'
+              '&jmapUrl=https://jmap.url',
         );
 
         final result = deepLinkManager.parseOpenAppDeepLink(uri);
@@ -89,8 +89,8 @@ void main() {
         final uri = Uri.parse(
           'twake://openApp?access_token=token123'
               '&expires_in=not_a_number'
-              '&registration_url=https://registration.url'
-              '&jmap_url=https://jmap.url',
+              '&registrationUrl=https://registration.url'
+              '&jmapUrl=https://jmap.url',
         );
 
         final result = deepLinkManager.parseOpenAppDeepLink(uri);
@@ -103,14 +103,48 @@ void main() {
         final uri = Uri.parse(
           'twake://openApp?access_token=token123'
               '&username=invalid_base64'
-              '&registration_url=https://registration.url'
-              '&jmap_url=https://jmap.url',
+              '&registrationUrl=https://registration.url'
+              '&jmapUrl=https://jmap.url',
         );
 
         final result = deepLinkManager.parseOpenAppDeepLink(uri);
 
         expect(result, isNotNull);
         expect(result?.username, 'invalid_base64');
+      });
+
+      test('SHOULD returns OpenAppDeepLinkData with jmapUrl contains sub-path and port', () {
+        final uri = Uri.parse(
+          'twake://openApp?access_token=token123'
+              '&refresh_token=refresh123'
+              '&id_token=id123'
+              '&expires_in=3600'
+              '&username=dXNlcg=='
+              '&registrationUrl=https://registration.url'
+              '&jmapUrl=https://jmap.url:1000/jmap',
+        );
+
+        final result = deepLinkManager.parseOpenAppDeepLink(uri);
+
+        expect(result, isNotNull);
+        expect(result?.jmapUrl, 'https://jmap.url:1000/jmap');
+      });
+
+      test('SHOULD returns OpenAppDeepLinkData with registrationUrl contains sub-path and port', () {
+        final uri = Uri.parse(
+          'twake://openApp?access_token=token123'
+              '&refresh_token=refresh123'
+              '&id_token=id123'
+              '&expires_in=3600'
+              '&username=dXNlcg=='
+              '&registrationUrl=https://registration.url:1000/register'
+              '&jmapUrl=https://jmap.url',
+        );
+
+        final result = deepLinkManager.parseOpenAppDeepLink(uri);
+
+        expect(result, isNotNull);
+        expect(result?.registrationUrl, 'https://registration.url:1000/register');
       });
     });
   });

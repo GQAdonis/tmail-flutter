@@ -4,7 +4,6 @@ import 'package:app_links/app_links.dart';
 import 'package:core/utils/app_logger.dart';
 import 'package:rxdart/subjects.dart';
 import 'package:tmail_ui_user/features/base/mixin/message_dialog_action_mixin.dart';
-import 'package:tmail_ui_user/features/login/data/network/config/oidc_constant.dart';
 import 'package:tmail_ui_user/main/deep_links/deep_link_action_type.dart';
 import 'package:tmail_ui_user/main/deep_links/deep_link_callback_action_define.dart';
 import 'package:tmail_ui_user/main/deep_links/deep_link_data.dart';
@@ -54,12 +53,7 @@ class DeepLinksManager with MessageDialogActionMixin, OpenAppDeepLinkHandlerMixi
   DeepLinkData? parseDeepLink(String url) {
     try {
       final decodedUrl = Uri.decodeFull(url);
-
-      final updatedUrl = decodedUrl.replaceFirst(
-        OIDCConstant.twakeWorkplaceUrlScheme,
-        'https',
-      );
-      final uri = Uri.parse(updatedUrl);
+      final uri = Uri.parse(decodedUrl);
       log('DeepLinksManager::parseDeepLink:uri = $uri');
       final action = uri.host;
 
