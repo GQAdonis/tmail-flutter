@@ -475,7 +475,7 @@ class IdentityCreatorView extends GetWidget<IdentityCreatorController>
           ConstrainedBox(
             constraints: BoxConstraints(
               maxWidth: maxWidth,
-              maxHeight: 500,
+              maxHeight: 300,
             ),
             child: _buildHtmlEditorWeb(
               context,
