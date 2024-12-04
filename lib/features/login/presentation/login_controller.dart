@@ -164,6 +164,7 @@ class LoginController extends ReloadableController {
     } else if (failure is GetAuthenticatedAccountFailure) {
       _checkOIDCIsAvailable();
     } else if (failure is GetSessionFailure) {
+      SmartDialog.dismiss();
       clearAllData();
     } else if (failure is DNSLookupToGetJmapUrlFailure) {
       _username = null;
@@ -219,6 +220,7 @@ class LoginController extends ReloadableController {
       _handleNoSuitableBrowserOIDC(failure)
         .map((stillFailed) => _handleCommonOIDCFailure());
     } else if (failure is GetSessionFailure) {
+      SmartDialog.dismiss();
       clearAllData();
     } else {
       super.handleUrgentException(failure: failure, exception: exception);
@@ -233,18 +235,6 @@ class LoginController extends ReloadableController {
       RouteUtils.generateNavigationRoute(AppRoutes.dashboard),
       arguments: session,
     );
-  }
-
-  @override
-  void handleGetSessionFailure(GetSessionFailure failure) {
-    SmartDialog.dismiss();
-    super.handleGetSessionFailure(failure);
-  }
-
-  @override
-  void handleUrgentExceptionOnMobile({Failure? failure, Exception? exception}) {
-    SmartDialog.dismiss();
-    super.handleUrgentExceptionOnMobile(failure: failure, exception: exception);
   }
 
   void _registerDeepLinks() {
