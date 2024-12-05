@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 import 'package:universal_html/html.dart' hide VoidCallback;
 
-typedef OnSuperDrop = void Function(String value);
+typedef OnSuperTextDrop = void Function(String value);
 
 class TextDropZoneWeb extends StatefulWidget {
   const TextDropZoneWeb({
@@ -21,7 +21,7 @@ class TextDropZoneWeb extends StatefulWidget {
   final Widget child;
   final VoidCallback? onHover;
   final VoidCallback? onLeave;
-  final OnSuperDrop? onDrop;
+  final OnSuperTextDrop? onDrop;
 
   @override
   State<TextDropZoneWeb> createState() => _TextDropZoneWebState();
@@ -39,26 +39,14 @@ class _TextDropZoneWebState extends State<TextDropZoneWeb> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _dragEnterSubscription = window.onDragEnter.listen((event) {
-        if (event.dataTransfer.types?.validateFilesTransfer == true) {
-          setState(() {
-            _textIsDragging = false;
-          });
-        } else {
-          setState(() {
-            _textIsDragging = true;
-          });
-        }
+        setState(() {
+          _textIsDragging = event.dataTransfer.types?.validateFilesTransfer != true;
+        });
       });
       _dragOverSubscription = window.onDragOver.listen((event) {
-        if (event.dataTransfer.types?.validateFilesTransfer == true) {
-          setState(() {
-            _textIsDragging = false;
-          });
-        } else {
-          setState(() {
-            _textIsDragging = true;
-          });
-        }
+        setState(() {
+          _textIsDragging = event.dataTransfer.types?.validateFilesTransfer != true;
+        });
       });
       _dropSubscription = window.onDrop.listen((event) {
         setState(() {
