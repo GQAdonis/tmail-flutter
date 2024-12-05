@@ -144,7 +144,7 @@ class _TextFieldBuilderState extends State<TextFieldBuilder> {
 
     return TextDropZoneWeb(
       onDrop: (value) {
-        (_languageToolController ?? _controller)?.text = value;
+        (_languageToolController ?? _controller)?.text += value;
         widget.focusNode?.requestFocus();
         _onChanged(value);
       },

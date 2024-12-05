@@ -176,7 +176,7 @@ class _RecipientComposerWidgetState extends State<RecipientComposerWidget> {
                             if (_isDragging) {
                               stateSetter(() => _isDragging = false);
                             }
-                            widget.controller?.text = value;
+                            widget.controller?.text += value;
                             widget.focusNode?.requestFocus();
                           },
                           child: TagEditor<SuggestionEmailAddress>(
