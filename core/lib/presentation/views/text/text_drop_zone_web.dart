@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 import 'package:universal_html/html.dart' hide VoidCallback;
 
+typedef OnSuperDrop = void Function(String value);
+
 class TextDropZoneWeb extends StatefulWidget {
   const TextDropZoneWeb({
     super.key,
@@ -19,7 +21,7 @@ class TextDropZoneWeb extends StatefulWidget {
   final Widget child;
   final VoidCallback? onHover;
   final VoidCallback? onLeave;
-  final void Function(String value)? onDrop;
+  final OnSuperDrop? onDrop;
 
   @override
   State<TextDropZoneWeb> createState() => _TextDropZoneWebState();
@@ -35,7 +37,7 @@ class _TextDropZoneWebState extends State<TextDropZoneWeb> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       _dragEnterSubscription = window.onDragEnter.listen((event) {
         if (event.dataTransfer.types?.validateFilesTransfer == true) {
           setState(() {
